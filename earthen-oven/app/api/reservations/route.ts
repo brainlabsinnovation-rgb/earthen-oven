@@ -161,7 +161,7 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const phone = searchParams.get("phone");
-    const reservationNumber = searchParams.get("number");
+    const reservationNumber = searchParams.get("reservationNumber") || searchParams.get("number");
 
     if (!phone && !reservationNumber) {
         return NextResponse.json({ error: "Phone or Reservation Number required" }, { status: 400 });

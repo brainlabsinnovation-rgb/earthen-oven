@@ -23,7 +23,8 @@ export default function TrackReservationPage() {
 
         try {
             const cleanSearch = search.trim();
-            const isPhone = cleanSearch.replace(/\D/g, '').length >= 10;
+            const startsWithEO = cleanSearch.toUpperCase().startsWith('EO');
+            const isPhone = !startsWithEO && cleanSearch.replace(/\D/g, '').length >= 10;
             const params = new URLSearchParams();
             if (isPhone) {
                 params.append("phone", cleanSearch);

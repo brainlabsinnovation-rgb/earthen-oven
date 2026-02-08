@@ -16,7 +16,7 @@ export default function ConfirmationPage({ params }: { params: Promise<{ id: str
     useEffect(() => {
         const fetchRes = async () => {
             try {
-                const res = await fetch(`/api/reservations?number=${id}`);
+                const res = await fetch(`/api/reservations?reservationNumber=${id}`);
                 const data = await res.json();
                 if (data && data.length > 0) {
                     setReservation(data[0]);
