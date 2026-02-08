@@ -22,11 +22,16 @@ export default function TrackReservationPage() {
         setLoading(true);
 
         try {
-            // Determine if input is phone or id
-            const isPhone = search.replace(/\D/g, '').length >= 10;
-            const query = isPhone ? `phone=${search}` : `number=${search}`;
+            const cleanSearch = search.trim();
+            const isPhone = cleanSearch.replace(/\D/g, '').length >= 10;
+            const params = new URLSearchParams();
+            if (isPhone) {
+                params.append("phone", cleanSearch);
+            } else {
+                params.append("reservationNumber", cleanSearch.toUpperCase());
+            }
 
-            const res = await fetch(`/api/reservations?${query}`);
+            const res = await fetch(`/api/reservations?${params.toString()}`);
             const data = await res.json();
 
             if (data.error) throw new Error(data.error);
@@ -76,8 +81,8 @@ export default function TrackReservationPage() {
                                             <p className="text-muted-foreground text-sm">{res.timeSlot} • {res.numberOfGuests} Guests</p>
                                         </div>
                                         <div className={`px-3 py-1 rounded text-xs font-bold border ${res.status === 'CONFIRMED' ? 'text-green-500 border-green-500/30 bg-green-500/10' :
-                                                res.status === 'PENDING' ? 'text-yellow-500 border-yellow-500/30 bg-yellow-500/10' :
-                                                    'text-gray-500'
+                                            res.status === 'PENDING' ? 'text-yellow-500 border-yellow-500/30 bg-yellow-500/10' :
+                                                'text-gray-500'
                                             }`}>
                                             {res.status}
                                         </div>

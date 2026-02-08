@@ -172,21 +172,41 @@ export async function GET(req: Request) {
             const { data: reservation } = await supabaseAdmin
                 .from('Reservation')
                 .select('*, customer:Customer(*)')
-                .eq('reservationNumber', reservationNumber)
+                .ilike('reservationNumber', reservationNumber)
                 .maybeSingle();
 
             return NextResponse.json(reservation ? [reservation] : []);
         }
 
         if (phone) {
-            const { data: customer } = await supabaseAdmin
+            // Try exact match first
+            let { data: customer } = await supabaseAdmin
                 .from('Customer')
                 .select('*, reservations:Reservation(*)')
                 .eq('phone', phone)
                 .maybeSingle();
 
+            // Fallback 1: If not found and phone doesn't start with +, try prepending it
+            if (!customer && !phone.startsWith('+')) {
+                const { data: altCustomer } = await supabaseAdmin
+                    .from('Customer')
+                    .select('*, reservations:Reservation(*)')
+                    .eq('phone', `+${phone}`)
+                    .maybeSingle();
+                customer = altCustomer;
+            }
+
+            // Fallback 2: If still not found and phone starts with +, try removing it
+            if (!customer && phone.startsWith('+')) {
+                const { data: altCustomer } = await supabaseAdmin
+                    .from('Customer')
+                    .select('*, reservations:Reservation(*)')
+                    .eq('phone', phone.substring(1))
+                    .maybeSingle();
+                customer = altCustomer;
+            }
+
             if (customer && customer.reservations) {
-                // Sort usually done in DB or JS. Supabase inner join sort is tricky.
                 customer.reservations.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
                 return NextResponse.json(customer.reservations);
             }
