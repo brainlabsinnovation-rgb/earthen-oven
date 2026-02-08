@@ -21,10 +21,28 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+    DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, Search, RefreshCw, LogOut } from "lucide-react";
+import {
+    CalendarIcon,
+    Search,
+    RefreshCw,
+    LogOut,
+    MoreVertical,
+    CheckCircle,
+    Clock,
+    UserCheck,
+    XCircle,
+    Check
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast, Toaster } from "react-hot-toast";
 
@@ -49,6 +67,7 @@ export default function AdminDashboard() {
     const [date, setDate] = useState<Date>(new Date());
     const [filterStatus, setFilterStatus] = useState("All");
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
     const [stats, setStats] = useState({ total: 0, pending: 0, covers: 0 });
 
     useEffect(() => {
@@ -83,6 +102,12 @@ export default function AdminDashboard() {
         const covers = data.reduce((acc, curr) => acc + curr.numberOfGuests, 0);
         setStats({ total, pending, covers });
     };
+
+    const filteredReservations = reservations.filter(res =>
+        res.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        res.reservationNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        res.customer.phone.includes(searchTerm)
+    );
 
     const updateStatus = async (id: string, newStatus: string) => {
         try {
@@ -186,20 +211,21 @@ export default function AdminDashboard() {
                             <Button
                                 variant={"outline"}
                                 className={cn(
-                                    "w-[240px] justify-start text-left font-normal bg-black border-white/10",
+                                    "w-[240px] justify-start text-left font-normal bg-black border-white/10 hover:border-accent/50 transition-colors",
                                     !date && "text-muted-foreground"
                                 )}
                             >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                <CalendarIcon className="mr-2 h-4 w-4 text-accent" />
                                 {date ? format(date, "PPP") : <span>Pick a date</span>}
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
+                        <PopoverContent className="w-auto p-0 bg-[#1A1A1A] border-white/10 shadow-2xl" align="start">
                             <Calendar
                                 mode="single"
                                 selected={date}
                                 onSelect={(d) => d && setDate(d)}
                                 initialFocus
+                                className="bg-[#1A1A1A] text-white"
                             />
                         </PopoverContent>
                     </Popover>
@@ -221,7 +247,12 @@ export default function AdminDashboard() {
 
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Search name or ID..." className="pl-9 bg-black border-white/10" />
+                    <Input
+                        placeholder="Search name, phone or ID..."
+                        className="pl-9 bg-black border-white/10"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                 </div>
             </div>
 
@@ -244,12 +275,12 @@ export default function AdminDashboard() {
                             <TableRow>
                                 <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Loading...</TableCell>
                             </TableRow>
-                        ) : reservations.length === 0 ? (
+                        ) : filteredReservations.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No reservations found.</TableCell>
                             </TableRow>
                         ) : (
-                            reservations.map((res) => (
+                            filteredReservations.map((res) => (
                                 <TableRow key={res.id} className="border-white/10 hover:bg-white/5">
                                     <TableCell className="font-mono text-xs">{res.reservationNumber}</TableCell>
                                     <TableCell>
@@ -283,32 +314,64 @@ export default function AdminDashboard() {
                                         )}
                                     </TableCell>
                                     <TableCell>
-                                        <div className="flex gap-2">
+                                        <div className="flex items-center gap-2">
                                             {res.status === 'PENDING' && (
-                                                <Button size="sm" className="h-8 bg-green-600 hover:bg-green-700" onClick={() => updateStatus(res.id, 'CONFIRMED')}>
+                                                <Button
+                                                    size="sm"
+                                                    className="h-8 bg-green-600 hover:bg-green-700 text-white gap-1 px-3"
+                                                    onClick={() => updateStatus(res.id, 'CONFIRMED')}
+                                                >
+                                                    <CheckCircle className="w-3.5 h-3.5" />
                                                     Confirm
                                                 </Button>
                                             )}
                                             {res.status === 'CONFIRMED' && (
-                                                <Button size="sm" className="h-8 bg-blue-600 hover:bg-blue-700" onClick={() => updateStatus(res.id, 'SEATED')}>
+                                                <Button
+                                                    size="sm"
+                                                    className="h-8 bg-blue-600 hover:bg-blue-700 text-white gap-1 px-3"
+                                                    onClick={() => updateStatus(res.id, 'SEATED')}
+                                                >
+                                                    <UserCheck className="w-3.5 h-3.5" />
                                                     Seat
                                                 </Button>
                                             )}
                                             {(res.status === 'SEATED') && (
-                                                <Button size="sm" className="h-8 bg-gray-600 hover:bg-gray-700" onClick={() => updateStatus(res.id, 'COMPLETED')}>
+                                                <Button
+                                                    size="sm"
+                                                    className="h-8 bg-gray-600 hover:bg-gray-700 text-white gap-1 px-3"
+                                                    onClick={() => updateStatus(res.id, 'COMPLETED')}
+                                                >
+                                                    <Check className="w-3.5 h-3.5" />
                                                     Done
                                                 </Button>
                                             )}
-                                            <Select onValueChange={(val) => updateStatus(res.id, val)}>
-                                                <SelectTrigger className="h-8 w-[30px] p-0 px-2 bg-transparent border-white/10">
-                                                    <span className="sr-only">More</span>
-                                                    ...
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="CANCELLED">Cancel</SelectItem>
-                                                    <SelectItem value="NO_SHOW">No Show</SelectItem>
-                                                </SelectContent>
-                                            </Select>
+
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 border border-white/10 hover:bg-white/10">
+                                                        <MoreVertical className="h-4 w-4" />
+                                                        <span className="sr-only">Open menu</span>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="bg-[#1A1A1A] border-white/10 text-white">
+                                                    <DropdownMenuItem onClick={() => updateStatus(res.id, 'CONFIRMED')} className="gap-2 cursor-pointer focus:bg-white/10">
+                                                        <CheckCircle className="w-4 h-4 text-green-500" /> Confirm
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => updateStatus(res.id, 'SEATED')} className="gap-2 cursor-pointer focus:bg-white/10">
+                                                        <UserCheck className="w-4 h-4 text-blue-500" /> Seat Customer
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => updateStatus(res.id, 'COMPLETED')} className="gap-2 cursor-pointer focus:bg-white/10">
+                                                        <Check className="w-4 h-4 text-gray-400" /> Mark Completed
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator className="bg-white/10" />
+                                                    <DropdownMenuItem onClick={() => updateStatus(res.id, 'CANCELLED')} className="gap-2 text-red-500 cursor-pointer focus:bg-red-500/10">
+                                                        <XCircle className="w-4 h-4" /> Cancel Reservation
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => updateStatus(res.id, 'NO_SHOW')} className="gap-2 text-orange-500 cursor-pointer focus:bg-orange-500/10">
+                                                        <Clock className="w-4 h-4" /> Mark No Show
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </div>
                                     </TableCell>
                                 </TableRow>
