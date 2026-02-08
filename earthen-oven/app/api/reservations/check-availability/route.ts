@@ -18,11 +18,9 @@ export async function POST(req: Request) {
         // Our DB stores "date" as timestamptz. We seed it at 12:00:00 usually.
         // Let's create a range search for the whole day.
 
-        const checkDate = new Date(date);
-        const startOfDay = new Date(checkDate);
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date(checkDate);
-        endOfDay.setHours(23, 59, 59, 999);
+        const [y, m, d] = date.split('T')[0].split('-').map(Number);
+        const startOfDay = new Date(Date.UTC(y, m - 1, d, 0, 0, 0, 0));
+        const endOfDay = new Date(Date.UTC(y, m - 1, d, 23, 59, 59, 999));
 
         const { data: availability, error } = await supabaseAdmin
             .from('TableAvailability')

@@ -22,11 +22,17 @@ export default function TrackReservationPage() {
         setLoading(true);
 
         try {
-            // Determine if input is phone or id
-            const isPhone = search.replace(/\D/g, '').length >= 10;
-            const query = isPhone ? `phone=${search}` : `number=${search}`;
+            const cleanSearch = search.trim();
+            const startsWithEO = cleanSearch.toUpperCase().startsWith('EO');
+            const isPhone = !startsWithEO && cleanSearch.replace(/\D/g, '').length >= 10;
+            const params = new URLSearchParams();
+            if (isPhone) {
+                params.append("phone", cleanSearch);
+            } else {
+                params.append("reservationNumber", cleanSearch.toUpperCase());
+            }
 
-            const res = await fetch(`/api/reservations?${query}`);
+            const res = await fetch(`/api/reservations?${params.toString()}`);
             const data = await res.json();
 
             if (data.error) throw new Error(data.error);
@@ -72,12 +78,17 @@ export default function TrackReservationPage() {
                                     <div className="flex justify-between items-start mb-4">
                                         <div>
                                             <p className="text-accent text-xs font-bold uppercase tracking-wider">#{res.reservationNumber}</p>
-                                            <h3 className="text-xl font-bold text-white mt-1">{format(new Date(res.date), "PPP")}</h3>
+                                            <h3 className="text-xl font-bold text-white mt-1">
+                                                {(() => {
+                                                    const [y, m, d] = res.date.split('T')[0].split('-').map(Number);
+                                                    return format(new Date(y, m - 1, d), "PPP");
+                                                })()}
+                                            </h3>
                                             <p className="text-muted-foreground text-sm">{res.timeSlot} • {res.numberOfGuests} Guests</p>
                                         </div>
                                         <div className={`px-3 py-1 rounded text-xs font-bold border ${res.status === 'CONFIRMED' ? 'text-green-500 border-green-500/30 bg-green-500/10' :
-                                                res.status === 'PENDING' ? 'text-yellow-500 border-yellow-500/30 bg-yellow-500/10' :
-                                                    'text-gray-500'
+                                            res.status === 'PENDING' ? 'text-yellow-500 border-yellow-500/30 bg-yellow-500/10' :
+                                                'text-gray-500'
                                             }`}>
                                             {res.status}
                                         </div>

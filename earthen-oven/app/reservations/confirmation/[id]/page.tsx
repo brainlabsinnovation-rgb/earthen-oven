@@ -16,7 +16,7 @@ export default function ConfirmationPage({ params }: { params: Promise<{ id: str
     useEffect(() => {
         const fetchRes = async () => {
             try {
-                const res = await fetch(`/api/reservations?number=${id}`);
+                const res = await fetch(`/api/reservations?reservationNumber=${id}`);
                 const data = await res.json();
                 if (data && data.length > 0) {
                     setReservation(data[0]);
@@ -62,7 +62,12 @@ export default function ConfirmationPage({ params }: { params: Promise<{ id: str
                                 <Calendar className="w-5 h-5 text-primary mt-1" />
                                 <div>
                                     <p className="text-xs text-muted-foreground uppercase">Date</p>
-                                    <p className="text-white font-medium">{format(new Date(reservation.date), "EEEE, MMMM do, yyyy")}</p>
+                                    <p className="text-white font-medium">
+                                        {(() => {
+                                            const [y, m, d] = reservation.date.split('T')[0].split('-').map(Number);
+                                            return format(new Date(y, m - 1, d), "EEEE, MMMM do, yyyy");
+                                        })()}
+                                    </p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-4">

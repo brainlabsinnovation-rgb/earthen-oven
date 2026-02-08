@@ -64,7 +64,7 @@ export function ReservationForm() {
             // Format date to ISO string for API
             const submissionData = {
                 ...values,
-                date: values.date.toISOString(),
+                date: format(values.date, "yyyy-MM-dd"),
             };
 
             const response = await fetch("/api/reservations", {

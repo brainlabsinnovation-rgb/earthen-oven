@@ -82,7 +82,7 @@ export default function AdminDashboard() {
         setLoading(true);
         try {
             const query = new URLSearchParams({
-                date: date.toISOString(),
+                date: format(date, "yyyy-MM-dd"),
                 status: filterStatus
             });
             const res = await fetch(`/api/admin/reservations?${query}`);
