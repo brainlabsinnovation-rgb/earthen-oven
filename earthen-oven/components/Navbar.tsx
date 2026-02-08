@@ -20,8 +20,10 @@ const navLinks = [
 
 export function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        setMounted(true);
         const handleScroll = () => {
             if (window.scrollY > 50) {
                 setIsScrolled(true);
@@ -67,6 +69,13 @@ export function Navbar() {
                     ))}
                     <Button
                         asChild
+                        variant="ghost"
+                        className="text-foreground/60 hover:text-primary transition-all uppercase tracking-tighter text-[10px] px-2 h-8"
+                    >
+                        <Link href="/admin/login">Admin Login</Link>
+                    </Button>
+                    <Button
+                        asChild
                         variant="outline"
                         className="border-primary text-primary hover:bg-primary hover:text-white transition-all uppercase tracking-wider text-xs px-6"
                     >
@@ -79,45 +88,53 @@ export function Navbar() {
                     <a href="tel:+917966824444" className="text-primary">
                         <Phone className="h-5 w-5" />
                     </a>
-                    <Sheet>
-                        <SheetTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-foreground">
-                                <Menu className="h-6 w-6" />
-                                <span className="sr-only">Toggle menu</span>
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent side="right" className="bg-background border-l-white/10">
-                            <div className="flex flex-col h-full justify-between py-10">
-                                <div className="flex flex-col space-y-8 items-center text-center">
-                                    <Link href="/" className="mb-8">
-                                        <span className="text-2xl font-heading font-bold text-primary italic">
-                                            Earthen Oven
-                                        </span>
-                                    </Link>
-                                    {navLinks.map((link) => (
-                                        <Link
-                                            key={link.name}
-                                            href={link.href}
-                                            className="text-lg font-medium tracking-wide uppercase hover:text-primary transition-colors"
-                                        >
-                                            {link.name}
+                    {mounted && (
+                        <Sheet>
+                            <SheetTrigger asChild>
+                                <Button variant="ghost" size="icon" className="text-foreground">
+                                    <Menu className="h-6 w-6" />
+                                    <span className="sr-only">Toggle menu</span>
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent side="right" className="bg-background border-l-white/10">
+                                <div className="flex flex-col h-full justify-between py-10">
+                                    <div className="flex flex-col space-y-8 items-center text-center">
+                                        <Link href="/" className="mb-8">
+                                            <span className="text-2xl font-heading font-bold text-primary italic">
+                                                Earthen Oven
+                                            </span>
                                         </Link>
-                                    ))}
-                                    <Link
-                                        href="/reservations"
-                                        className="text-lg font-medium tracking-wide uppercase text-primary"
-                                    >
-                                        Reservations
-                                    </Link>
-                                </div>
+                                        {navLinks.map((link) => (
+                                            <Link
+                                                key={link.name}
+                                                href={link.href}
+                                                className="text-lg font-medium tracking-wide uppercase hover:text-primary transition-colors"
+                                            >
+                                                {link.name}
+                                            </Link>
+                                        ))}
+                                        <Link
+                                            href="/reservations"
+                                            className="text-lg font-medium tracking-wide uppercase text-primary"
+                                        >
+                                            Reservations
+                                        </Link>
+                                        <Link
+                                            href="/admin/login"
+                                            className="text-xs font-medium tracking-widest uppercase text-foreground/40 mt-4"
+                                        >
+                                            Admin Login
+                                        </Link>
+                                    </div>
 
-                                <div className="text-center text-sm text-muted-foreground">
-                                    <p>+91 79 6682 4444</p>
-                                    <p className="mt-2">14th Floor, Fortune Landmark</p>
+                                    <div className="text-center text-sm text-muted-foreground">
+                                        <p>+91 79 6682 4444</p>
+                                        <p className="mt-2">14th Floor, Fortune Landmark</p>
+                                    </div>
                                 </div>
-                            </div>
-                        </SheetContent>
-                    </Sheet>
+                            </SheetContent>
+                        </Sheet>
+                    )}
                 </div>
             </div>
         </nav>
