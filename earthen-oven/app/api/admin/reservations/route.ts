@@ -13,10 +13,10 @@ export async function GET(req: Request) {
             .select('*, customer:Customer(*)');
 
         if (date) {
-            const startOfDay = new Date(date);
-            startOfDay.setHours(0, 0, 0, 0);
-            const endOfDay = new Date(date);
-            endOfDay.setHours(23, 59, 59, 999);
+            // Parse date string (might be ISO or YYYY-MM-DD)
+            const [y, m, d] = date.split('T')[0].split('-').map(Number);
+            const startOfDay = new Date(Date.UTC(y, m - 1, d, 0, 0, 0, 0));
+            const endOfDay = new Date(Date.UTC(y, m - 1, d, 23, 59, 59, 999));
             query = query.gte('date', startOfDay.toISOString()).lte('date', endOfDay.toISOString());
         }
 
